@@ -30,22 +30,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
-      - name: Set up Node
-        uses: actions/setup-node@v6
-        with:
-          node-version: lts/*
-          cache: 'npm'
-      - name: Install dependencies
-        run: npm ci
-      - name: Build
-        run: npm run build
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v4
-        with:
-          # Upload dist folder
-          path: './dist'
+      - name: install
+        run: yarn
+      - name: check types
+        run: yarn types
+      - name: build
+        run: yarn build
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
