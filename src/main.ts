@@ -39,7 +39,7 @@ map.on('style.load', () => {
 //////// models
 // parameters to ensure the model is georeferenced correctly on the map
 const modelOrigin: LngLatLike = LONG_STREET_LNG_LAT;
-const modelAltitude = 90;
+const modelAltitude = 87;
 const modelRotate = [Math.PI / 2, 0, 0];
 const modelAsMercatorCoordinate = mapboxgl.MercatorCoordinate.fromLngLat(
     modelOrigin,
@@ -75,18 +75,15 @@ const customLayer: CustomLayerInterface & { three?: ThreeEngine } = {
     onAdd: function (map: Map, gl: WebGLRenderingContext) {
         const camera = new THREE.Camera();
         const scene = new THREE.Scene();
-        // create two three.js lights to illuminate the model
-        const directionalLight = new THREE.DirectionalLight(0xffffff);
-        directionalLight.position.set(0, -70, 100).normalize();
-        scene.add(directionalLight);
-        const directionalLight2 = new THREE.DirectionalLight(0xffffff);
-        directionalLight2.position.set(0, 70, 100).normalize();
-        scene.add(directionalLight2);
-        // use the three.js GLTF loader to add the 3D model to the three.js scene
+        
+        const ambientLight = new THREE.AmbientLight(0xeeeeff, 0.4)
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
+        directionalLight.position.set(0, 150, 100).normalize();
+        scene.add(ambientLight, directionalLight);
         
         const sphereGeometry = new THREE.SphereGeometry(2)
 
-        scene.add(new THREE.Mesh(sphereGeometry, new THREE.MeshLambertMaterial({color: 'red'})))
+        scene.add(new THREE.Mesh(sphereGeometry, new THREE.MeshLambertMaterial({color: 0xf7e0a1})))
         
         // use the Mapbox GL JS map canvas for three.js
         const renderer = new THREE.WebGLRenderer({
@@ -99,7 +96,7 @@ const customLayer: CustomLayerInterface & { three?: ThreeEngine } = {
             camera, scene, map, renderer
         }
     },
-    render: function (gl, matrix) {
+    render: function (_, matrix) {
         const rotationX = new THREE.Matrix4().makeRotationAxis(
             new THREE.Vector3(1, 0, 0),
             modelTransform.rotateX
