@@ -99,15 +99,19 @@ map.on('style.load', () => {
 
 
  //////// models
-type ThreeEngine = {
-    camera: THREE.Camera
-    scene: THREE.Scene
-    map: Map
-    renderer: THREE.WebGLRenderer,
+type RenderState = {
+    three: {
+        camera: THREE.Camera
+        scene: THREE.Scene
+        renderer: THREE.WebGLRenderer
+    }
+    mapbox: {
+        map: Map
+    }
 }
 
 // configuration of the custom layer for a 3D model per the CustomLayerInterface
-const customLayer: CustomLayerInterface & { three?: ThreeEngine } = {
+const customLayer: CustomLayerInterface & { state?: RenderState } = {
     id: '3d-model',
     type: 'custom',
     renderingMode: '3d',
@@ -157,13 +161,16 @@ const customLayer: CustomLayerInterface & { three?: ThreeEngine } = {
         });
         renderer.autoClear = false;
 
-        this.three = {
-            camera, scene, map, renderer
-        }
+        this.state = {
+            three: {
+                camera, scene, renderer
+            },
+            mapbox: { map }
+        } 
     },
     render: function (_, matrix) {
 
-        const three = this.three!
+        const state = this.state!
 
         
         const elevationQuery = map.queryTerrainElevation(sceneStartOrigin)
@@ -187,10 +194,10 @@ const customLayer: CustomLayerInterface & { three?: ThreeEngine } = {
             .makeTranslation(sceneTransform.translateX, sceneTransform.translateY, sceneTransform.translateZ)
             .scale(new THREE.Vector3(sceneTransform.scale, -sceneTransform.scale, sceneTransform.scale));
         
-        three.camera.projectionMatrix = m.multiply(l);
-        three.renderer.resetState();
-        three.renderer.render(three.scene, three.camera);
-        three.map.triggerRepaint();
+        state.three.camera.projectionMatrix = m.multiply(l);
+        state.three.renderer.resetState();
+        state.three.renderer.render(state.three.scene, state.three.camera);
+        state.mapbox.map.triggerRepaint();
     }
 };
 
