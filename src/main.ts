@@ -10,6 +10,7 @@ type POIMarker = {
     altitudeRelativeToSceneOrigin: number
     text: string
     photo: string
+    googleMapsLink: string
 }
 
 const sceneStartOrigin: LngLatLike = [-2.35104, 51.63764]
@@ -31,73 +32,85 @@ const markers: POIMarker[] = [
     lnglat: [-2.35296, 51.63793],
     altitudeRelativeToSceneOrigin: 12,
     text: 'Clarences',
-    photo: 'clarences.jpg'
+    photo: 'clarences.jpg',
+    googleMapsLink: 'https://maps.app.goo.gl/xSBzJaL2biQKYp5Z9'
 },
     {
     lnglat: [-2.35208, 51.63766],
     altitudeRelativeToSceneOrigin: 10,
     text: 'Cotswold Book Room',
-    photo: 'cotswold-book-room.jpg'
+    photo: 'cotswold-book-room.jpg',
+    googleMapsLink: 'https://maps.app.goo.gl/kRX6gB2GTFQ2zTyg8'
 },
 {
     lnglat: [-2.35395, 51.63793],
     altitudeRelativeToSceneOrigin: 16,
     text: 'Daisy Daisy' ,
-    photo: 'daisy-daisy.jpg'
+    photo: 'daisy-daisy.jpg',
+    googleMapsLink: 'https://maps.app.goo.gl/q3y6xedjwoWQFHBM9'
 },
 {
     lnglat: [-2.35166, 51.63778],
     altitudeRelativeToSceneOrigin: 7.5,
     text: 'Good Food Kitchen and Bar' ,
-    photo: 'good-food.jpg'
+    photo: 'good-food.jpg',
+    googleMapsLink: 'https://maps.app.goo.gl/Pxa14Qe7K2gVN3KZA'
 },
 {
     lnglat: [-2.35182, 51.63778],
     altitudeRelativeToSceneOrigin: 8,
     text: 'Good Food on The Edge Greengrocer' ,
-    photo: 'greengrocer.jpg'
+    photo: 'greengrocer.jpg',
+    googleMapsLink: 'https://maps.app.goo.gl/wFdRzctp8AQkF7a99'
 },
 {
     lnglat: [-2.35367, 51.63804],
     altitudeRelativeToSceneOrigin: 15,
     text: 'Kings Barbershop' ,
-    photo: 'kings.jpg'
+    photo: 'kings.jpg',
+    googleMapsLink: 'https://maps.app.goo.gl/hRVyS9sbyjQKDExL9'
 },
 {
     lnglat: [-2.35357, 51.63789],
     altitudeRelativeToSceneOrigin: 15,
     text: 'Loving Home' ,
-    photo: 'loving-home.jpg'
+    photo: 'loving-home.jpg',
+    googleMapsLink: 'https://maps.app.goo.gl/N9hpW3QQ6TEKS8at8'
 },
 {
     lnglat: [-2.35260, 51.63774],
     altitudeRelativeToSceneOrigin: 11,
     text: 'Relish' ,
-    photo: 'relish.jpg'
+    photo: 'relish.jpg',
+    googleMapsLink: 'https://maps.app.goo.gl/41X8vSZhdNmMif8C8'
 },
 {
     lnglat: [-2.35497, 51.63814],
     altitudeRelativeToSceneOrigin: 18,
     text: 'The Royal Oak' ,
-    photo: 'royal-oak.jpg'
+    photo: 'royal-oak.jpg',
+    googleMapsLink: 'https://maps.app.goo.gl/BFfBLAZKDiCLKyiv7'
 },
 {
     lnglat: [-2.35323, 51.63780],
     altitudeRelativeToSceneOrigin: 12.5,
     text: 'The Edge Coffee Shop' ,
-    photo: 'the-edge.jpg'
+    photo: 'the-edge.jpg',
+    googleMapsLink: 'https://maps.app.goo.gl/aXWbNBnVJAHqibMj8'
 },
 {
     lnglat: [-2.35014, 51.63769],
     altitudeRelativeToSceneOrigin: 2,
     text: 'The Falcon Steak House' ,
-    photo: 'the-falcon.jpg'
+    photo: 'the-falcon.jpg',
+    googleMapsLink: 'https://maps.app.goo.gl/sA4ZeJg2N6fNmS5t6'
 },
 {
     lnglat: [-2.35227, 51.63782],
     altitudeRelativeToSceneOrigin: 10,
     text: 'Wotton Home Essentials' ,
-    photo: 'wotton-home-essentials.jpg'
+    photo: 'wotton-home-essentials.jpg',
+    googleMapsLink: 'https://maps.app.goo.gl/2hdj41CU8jdWAjn39'
 }
 
 ] 
@@ -214,7 +227,7 @@ const customLayer: CustomLayerInterface & { state?: RenderState } = {
             }
                
             const markerHit = markers[hit.object.userData.markerIndex]
-            infoDiv.innerHTML = markerHit.text
+            infoDiv.innerHTML = `${markerHit.text}: <a target="_blank" href="${markerHit.googleMapsLink}">open on google maps<a/>`
             
         })
 
