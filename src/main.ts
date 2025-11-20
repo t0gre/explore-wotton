@@ -11,6 +11,14 @@ type POIMarker = {
 const sceneStartOrigin: LngLatLike = [-2.35104, 51.63764]
 let sceneElevation = 89
 
+const sceneOriginMercator = mapboxgl.MercatorCoordinate.fromLngLat(sceneStartOrigin, sceneElevation); 
+const sceneTransform = {
+    translateX: sceneOriginMercator.x,
+    translateY: sceneOriginMercator.y,
+    translateZ: sceneOriginMercator.z,
+    scale: sceneOriginMercator.meterInMercatorCoordinateUnits()
+};
+
 
 const markers: POIMarker[] = [
     {
@@ -181,32 +189,16 @@ const customLayer: CustomLayerInterface & { state?: RenderState } = {
 
         const state = this.state!
 
-        
-        const elevationQuery = map.queryTerrainElevation(sceneStartOrigin)
-        
-        if (elevationQuery !== null && elevationQuery !== undefined) {
-            sceneElevation = elevationQuery
-        }
-        
-        const sceneOriginMercator = mapboxgl.MercatorCoordinate.fromLngLat(sceneStartOrigin, sceneElevation);
-
-        
-        const sceneTransform = {
-            translateX: sceneOriginMercator.x,
-            translateY: sceneOriginMercator.y,
-            translateZ: sceneOriginMercator.z,
-            scale: sceneOriginMercator.meterInMercatorCoordinateUnits()
-        };
-
+        // create three camera from mapbox matrix
         const m = new THREE.Matrix4().fromArray(matrix);
         const l = new THREE.Matrix4()
             .makeTranslation(sceneTransform.translateX, sceneTransform.translateY, sceneTransform.translateZ)
-            .scale(new THREE.Vector3(sceneTransform.scale, -sceneTransform.scale, sceneTransform.scale));
-        
+            .scale(new THREE.Vector3(sceneTransform.scale, -sceneTransform.scale, sceneTransform.scale))
+        state.three.camera.projectionMatrix = m.multiply(l);
+
         // update markers    
         state.three.scene.children.forEach(child => child.rotateY(Math.PI/200))
-        
-        state.three.camera.projectionMatrix = m.multiply(l);
+
         state.three.renderer.resetState();
         state.three.renderer.render(state.three.scene, state.three.camera);
         state.mapbox.map.triggerRepaint();
