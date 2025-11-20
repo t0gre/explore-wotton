@@ -2,22 +2,43 @@ import mapboxgl, { Map, MercatorCoordinate, type CustomLayerInterface, type LngL
 import 'mapbox-gl/dist/mapbox-gl.css';
 import * as THREE from 'three'
 
-type SceneObjectPosition = {
+type POIMarker = {
     lnglat: LngLatLike
     altitudeRelativeToSceneOrigin: number
+    text: string
 }
 
 const sceneOrigin: LngLatLike = [-2.35104, 51.63764]
 
-const model1Location: SceneObjectPosition = {
+const markers: POIMarker[] = [
+//     {
+//     lnglat: [-2.35208, 51.63766],
+//     altitudeRelativeToSceneOrigin: 1.3,
+//     text: 'Cotswold Book Room'
+// },
+// {
+//     lnglat: [-2.35315, 51.63781],
+//     altitudeRelativeToSceneOrigin: 1.5,
+//     text: 'Tap Room'
+// },
+// {
+//     lnglat: [-2.35497, 51.63814],
+//     altitudeRelativeToSceneOrigin: 1,
+//     text: 'The Royal Oak' 
+// },
+{
     lnglat: [-2.35106, 51.63764],
-    altitudeRelativeToSceneOrigin: 1
-};
-
-const model2Location: SceneObjectPosition = {
+    altitudeRelativeToSceneOrigin: 2,
+    text: 'The Edge Coffee Shop' 
+},
+{
     lnglat: [-2.35102, 51.63764],
-    altitudeRelativeToSceneOrigin: 1
-}; 
+    altitudeRelativeToSceneOrigin: 2,
+    text: 'Clarences' 
+}
+
+] 
+
 
 mapboxgl.accessToken = 'pk.eyJ1IjoidG9tZ3JlZW53b29kIiwiYSI6ImNsb2E5dThjNzBsbjkyanFxd2hiOHB0bTMifQ.OnRKHkIO_7GKC7vSvdx7og';
 
@@ -102,25 +123,23 @@ const customLayer: CustomLayerInterface & { three?: ThreeEngine } = {
         // shapes
         const sphereGeometry = new THREE.SphereGeometry(2)
         const sphereMesh = new THREE.Mesh(sphereGeometry, new THREE.MeshLambertMaterial({color: 0xf7e0a1}))
-        
-        const model1 = sphereMesh
-        const model2 = sphereMesh.clone()
-
-        const model1up = 1;
-        const model2up = 1;
+         
 
         // Getting model x and y (in meters) relative to scene origin.
         const sceneOriginMercator = mapboxgl.MercatorCoordinate.fromLngLat(sceneOrigin);
-        const model1Mercator = mapboxgl.MercatorCoordinate.fromLngLat(model1Location.lnglat);
-        const model2Mercator = mapboxgl.MercatorCoordinate.fromLngLat(model2Location.lnglat);
-        const {dEastMeter: model1east, dNorthMeter: model1north} = calculateDistanceMercatorToMeters(sceneOriginMercator, model1Mercator);
-        const {dEastMeter: model2east, dNorthMeter: model2north} = calculateDistanceMercatorToMeters(sceneOriginMercator, model2Mercator);
 
-        model1.position.set(model1east, model1up, model1north);
-        model2.position.set(model2east, model2up, model2north);
+        for (const marker of markers) {
+           
+            const markerMercator = mapboxgl.MercatorCoordinate.fromLngLat(marker.lnglat);
+            const {dEastMeter: modelEast, dNorthMeter: modelNorth} = calculateDistanceMercatorToMeters(sceneOriginMercator, markerMercator);
+            
+            const markerMesh = sphereMesh.clone()   
+            markerMesh.position.set(modelEast, marker.altitudeRelativeToSceneOrigin, modelNorth);
 
-        scene.add(model1);
-        scene.add(model2);
+            scene.add(markerMesh);
+        
+        }
+       
 
         // use the Mapbox GL JS map canvas for three.js
         const renderer = new THREE.WebGLRenderer({
