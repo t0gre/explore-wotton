@@ -133,9 +133,16 @@ const customLayer: CustomLayerInterface & { state?: RenderState } = {
         scene.add(ambientLight, directionalLight);
         
         // shapes
-        const sphereGeometry = new THREE.SphereGeometry(2)
-        const sphereMesh = new THREE.Mesh(sphereGeometry, new THREE.MeshLambertMaterial({color: 0xf7e0a1}))
-         
+        const markerGeometry = new THREE.BoxGeometry(3,3,3)
+        
+        // 1. Create a texture loader
+        const loader = new THREE.TextureLoader();
+
+        // 2. Load the image and create a material
+        const material = new THREE.MeshBasicMaterial({
+            map: loader.load('bridge.jpg')
+        });
+
 
         // Getting model x and y (in meters) relative to scene origin.
         const sceneOriginMercator = mapboxgl.MercatorCoordinate.fromLngLat(sceneStartOrigin);
@@ -145,7 +152,8 @@ const customLayer: CustomLayerInterface & { state?: RenderState } = {
             const markerMercator = mapboxgl.MercatorCoordinate.fromLngLat(marker.lnglat);
             const {dEastMeter: modelEast, dNorthMeter: modelNorth} = calculateDistanceMercatorToMeters(sceneOriginMercator, markerMercator);
             
-            const markerMesh = sphereMesh.clone()   
+            const markerMesh = new THREE.Mesh(markerGeometry, material)
+
             markerMesh.position.set(modelEast, marker.altitudeRelativeToSceneOrigin, modelNorth);
 
             scene.add(markerMesh);
@@ -193,6 +201,9 @@ const customLayer: CustomLayerInterface & { state?: RenderState } = {
         const l = new THREE.Matrix4()
             .makeTranslation(sceneTransform.translateX, sceneTransform.translateY, sceneTransform.translateZ)
             .scale(new THREE.Vector3(sceneTransform.scale, -sceneTransform.scale, sceneTransform.scale));
+        
+        // update markers    
+        state.three.scene.children.forEach(child => child.rotateY(Math.PI/200))
         
         state.three.camera.projectionMatrix = m.multiply(l);
         state.three.renderer.resetState();
