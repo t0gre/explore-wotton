@@ -6,6 +6,7 @@ type POIMarker = {
     lnglat: LngLatLike
     altitudeRelativeToSceneOrigin: number
     text: string
+    photo: string
 }
 
 const sceneStartOrigin: LngLatLike = [-2.35104, 51.63764]
@@ -19,32 +20,39 @@ const sceneTransform = {
     scale: sceneOriginMercator.meterInMercatorCoordinateUnits()
 };
 
+const locationPointerGeometry = new THREE.ConeGeometry(0.5, 2, 8)
+const locationPointerMaterial = new THREE.MeshStandardMaterial({color: 0xffffdd})
 
 const markers: POIMarker[] = [
     {
     lnglat: [-2.35208, 51.63766],
     altitudeRelativeToSceneOrigin: 10,
-    text: 'Cotswold Book Room'
+    text: 'Cotswold Book Room',
+    photo: 'bridge.jpg'
 },
 {
     lnglat: [-2.35296, 51.63793],
-    altitudeRelativeToSceneOrigin: 16,
-    text: 'Clarences'
+    altitudeRelativeToSceneOrigin: 15,
+    text: 'Clarences',
+    photo: 'bridge.jpg'
 },
 {
     lnglat: [-2.35497, 51.63814],
     altitudeRelativeToSceneOrigin: 18,
-    text: 'The Royal Oak' 
+    text: 'The Royal Oak' ,
+    photo: 'bridge.jpg'
 },
 {
     lnglat: [-2.35323, 51.63780],
-    altitudeRelativeToSceneOrigin: 17,
-    text: 'The Edge Coffee Shop' 
+    altitudeRelativeToSceneOrigin: 15,
+    text: 'The Edge Coffee Shop' ,
+    photo: 'bridge.jpg'
 },
 {
     lnglat: [-2.35395, 51.63793],
     altitudeRelativeToSceneOrigin: 17,
-    text: 'Daisy Daisy' 
+    text: 'Daisy Daisy' ,
+    photo: 'bridge.jpg'
 }
 
 ] 
@@ -135,21 +143,19 @@ const customLayer: CustomLayerInterface & { state?: RenderState } = {
         // We now have a scene with (x=east, y=up, z=north)
 
         // lighting
-        const ambientLight = new THREE.AmbientLight(0xeeeeff, 0.4)
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
-        directionalLight.position.set(0, 150, 100).normalize();
+        const ambientLight = new THREE.AmbientLight(0xeeeeff, 1)
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 3);
+        directionalLight.position.set(180, 150, -100).normalize();
         scene.add(ambientLight, directionalLight);
         
         // shapes
-        const markerGeometry = new THREE.BoxGeometry(4,3,0.5)
+        const billboardGeometry = new THREE.BoxGeometry(4,3,0.5)
+
         
         // 1. Create a texture loader
         const loader = new THREE.TextureLoader();
 
-        // 2. Load the image and create a material
-        const material = new THREE.MeshBasicMaterial({
-            map: loader.load('bridge.jpg')
-        });
+        
 
 
         // Getting model x and y (in meters) relative to scene origin.
@@ -157,15 +163,25 @@ const customLayer: CustomLayerInterface & { state?: RenderState } = {
 
         for (const marker of markers) {
            
+            const markerObject = new THREE.Object3D()
             const markerMercator = mapboxgl.MercatorCoordinate.fromLngLat(marker.lnglat);
             const {dEastMeter: modelEast, dNorthMeter: modelNorth} = calculateDistanceMercatorToMeters(sceneOriginMercator, markerMercator);
+            markerObject.position.set(modelEast, marker.altitudeRelativeToSceneOrigin, modelNorth);
+            markerObject.rotateY(Math.PI * Math.random()) // add some randomness so that they don't all have the same angle
+
             
-            const markerMesh = new THREE.Mesh(markerGeometry, material)
+            const material = new THREE.MeshStandardMaterial({
+                map: loader.load(marker.photo)
+            });
+            const billboardMesh = new THREE.Mesh(billboardGeometry, material)
 
-            markerMesh.position.set(modelEast, marker.altitudeRelativeToSceneOrigin, modelNorth);
-            markerMesh.rotateY(Math.PI * Math.random()) // add some randomness so that they don't all have the same angle
+            const locationPointer = new THREE.Mesh(locationPointerGeometry, locationPointerMaterial) 
+            locationPointer.rotateX(Math.PI) // turn it upside down
+            locationPointer.position.set(0,-3, 0)
 
-            scene.add(markerMesh);
+            markerObject.add(billboardMesh, locationPointer)
+           
+            scene.add(markerObject);
         
         }
        
