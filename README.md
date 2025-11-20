@@ -1,1 +1,1 @@
-Compress photos with `ffmpeg -i bridge.jpg -vf scale=320:240 bridge.jpg`
+compress-photos.sh can be used to compress photos offline but will need to be copied into the photos' directory
