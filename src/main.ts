@@ -2,6 +2,9 @@ import mapboxgl, { Map, MercatorCoordinate, type CustomLayerInterface, type LngL
 import 'mapbox-gl/dist/mapbox-gl.css';
 import * as THREE from 'three'
 
+const mapDiv = document.getElementById("map")! // guarnteed since it's hardcoded in the html
+const infoDiv = document.getElementById("info")!
+
 type POIMarker = {
     lnglat: LngLatLike
     altitudeRelativeToSceneOrigin: number
@@ -168,6 +171,9 @@ type RenderState = {
     }
 }
 
+// to be reused so save on allocations
+const mouseClickNDC = new THREE.Vector2() 
+
 // configuration of the custom layer for a 3D model per the CustomLayerInterface
 const customLayer: CustomLayerInterface & { state?: RenderState } = {
     id: '3d-model',
@@ -175,12 +181,46 @@ const customLayer: CustomLayerInterface & { state?: RenderState } = {
     renderingMode: '3d',
     onAdd: function (map: Map, gl: WebGLRenderingContext) {
 
-        const camera = new THREE.Camera();
+        const camera = new THREE.PerspectiveCamera();
         const scene = new THREE.Scene();
+        const raycaster = new THREE.Raycaster()
+
+        mapDiv.addEventListener("click", (event) => {
+
+            const rect = mapDiv.getBoundingClientRect();
+
+            // 1. Get pixel coordinates relative to the canvas
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            
+            mouseClickNDC.x = (x / rect.width) * 2 - 1;
+            mouseClickNDC.y = (y / rect.height) * -2 + 1; 
+
+            const camInverseProjection = new THREE.Matrix4().copy(camera.projectionMatrix).invert();
+            const cameraPosition = new THREE.Vector3().applyMatrix4(camInverseProjection);
+            const mousePosition = new THREE.Vector3(mouseClickNDC.x, mouseClickNDC.y, 1).applyMatrix4(camInverseProjection);
+            const viewDirection = mousePosition.clone().sub(cameraPosition).normalize();    
+            raycaster.set(cameraPosition, viewDirection);
+
+            const intersects = raycaster.intersectObjects(scene.children);
+
+            if (intersects.length === 0) {
+                return
+            }
+                
+            const hit = intersects[0]
+            if (hit.object.userData.markerIndex === null || hit.object.userData.markerIndex === undefined) {
+                return
+            }
+               
+            const markerHit = markers[hit.object.userData.markerIndex]
+            infoDiv.innerHTML = markerHit.text
+            
+        })
 
         // In threejs, y points up - we're rotating the scene such that it's y points along maplibre's up.
         scene.rotateX(Math.PI / 2);
-        // In threejs, z points toward the viewer - mirroring it such that z points along maplibre's north.
+        // // In threejs, z points toward the viewer - mirroring it such that z points along maplibre's north.
         scene.scale.multiply(new THREE.Vector3(1, 1, -1));
         // We now have a scene with (x=east, y=up, z=north)
 
@@ -192,34 +232,34 @@ const customLayer: CustomLayerInterface & { state?: RenderState } = {
         
         // shapes
         const billboardGeometry = new THREE.BoxGeometry(4,3,0.5)
-
-        
-        // 1. Create a texture loader
         const loader = new THREE.TextureLoader();
-
-        
 
 
         // Getting model x and y (in meters) relative to scene origin.
         const sceneOriginMercator = mapboxgl.MercatorCoordinate.fromLngLat(sceneStartOrigin);
 
-        for (const marker of markers) {
+        for (let i = 0; i < markers.length; i++ ) {
            
+            const marker = markers[i];
+            const markerUserData = {
+                markerIndex: i
+            }
             const markerObject = new THREE.Object3D()
             const markerMercator = mapboxgl.MercatorCoordinate.fromLngLat(marker.lnglat);
             const {dEastMeter: modelEast, dNorthMeter: modelNorth} = calculateDistanceMercatorToMeters(sceneOriginMercator, markerMercator);
             markerObject.position.set(modelEast, marker.altitudeRelativeToSceneOrigin, modelNorth);
             markerObject.rotateY(Math.PI * Math.random()) // add some randomness so that they don't all have the same angle
-
-            
+                        
             const material = new THREE.MeshStandardMaterial({
                 map: loader.load(marker.photo)
             });
             const billboardMesh = new THREE.Mesh(billboardGeometry, material)
+            billboardMesh.userData = markerUserData
 
             const locationPointer = new THREE.Mesh(locationPointerGeometry, locationPointerMaterial) 
             locationPointer.rotateX(Math.PI) // turn it upside down
             locationPointer.position.set(0,-3, 0)
+            locationPointer.userData = markerUserData
 
             markerObject.add(billboardMesh, locationPointer)
            
