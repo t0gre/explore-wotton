@@ -1,0 +1,1 @@
+Compress photos with `ffmpeg -i bridge.jpg -vf scale=320:240 bridge.jpg`
