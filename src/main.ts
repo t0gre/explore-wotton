@@ -8,7 +8,9 @@ type POIMarker = {
     text: string
 }
 
-const sceneOrigin: LngLatLike = [-2.35104, 51.63764]
+const sceneStartOrigin: LngLatLike = [-2.35104, 51.63764]
+let sceneElevation = 89
+
 
 const markers: POIMarker[] = [
     {
@@ -67,7 +69,7 @@ const map = new mapboxgl.Map({
     container: 'map',
     antialias: true,
     zoom: 18,
-    center: sceneOrigin,
+    center: sceneStartOrigin,
     pitch: 80,
     bearing: 280,
     // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
@@ -101,7 +103,7 @@ type ThreeEngine = {
     camera: THREE.Camera
     scene: THREE.Scene
     map: Map
-    renderer: THREE.WebGLRenderer
+    renderer: THREE.WebGLRenderer,
 }
 
 // configuration of the custom layer for a 3D model per the CustomLayerInterface
@@ -132,7 +134,7 @@ const customLayer: CustomLayerInterface & { three?: ThreeEngine } = {
          
 
         // Getting model x and y (in meters) relative to scene origin.
-        const sceneOriginMercator = mapboxgl.MercatorCoordinate.fromLngLat(sceneOrigin);
+        const sceneOriginMercator = mapboxgl.MercatorCoordinate.fromLngLat(sceneStartOrigin);
 
         for (const marker of markers) {
            
@@ -163,9 +165,16 @@ const customLayer: CustomLayerInterface & { three?: ThreeEngine } = {
 
         const three = this.three!
 
-        const offsetFromCenterElevation = map.queryTerrainElevation(sceneOrigin) || 0;
-        const sceneOriginMercator = mapboxgl.MercatorCoordinate.fromLngLat(sceneOrigin, offsetFromCenterElevation);
+        
+        const elevationQuery = map.queryTerrainElevation(sceneStartOrigin)
+        
+        if (elevationQuery !== null && elevationQuery !== undefined) {
+            sceneElevation = elevationQuery
+        }
+        
+        const sceneOriginMercator = mapboxgl.MercatorCoordinate.fromLngLat(sceneStartOrigin, sceneElevation);
 
+        
         const sceneTransform = {
             translateX: sceneOriginMercator.x,
             translateY: sceneOriginMercator.y,
@@ -178,10 +187,9 @@ const customLayer: CustomLayerInterface & { three?: ThreeEngine } = {
             .makeTranslation(sceneTransform.translateX, sceneTransform.translateY, sceneTransform.translateZ)
             .scale(new THREE.Vector3(sceneTransform.scale, -sceneTransform.scale, sceneTransform.scale));
         
-        
         three.camera.projectionMatrix = m.multiply(l);
         three.renderer.resetState();
-        three.renderer.render(this.three!.scene, this.three!.camera);
+        three.renderer.render(three.scene, three.camera);
         three.map.triggerRepaint();
     }
 };
