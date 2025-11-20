@@ -24,35 +24,77 @@ const locationPointerGeometry = new THREE.ConeGeometry(0.5, 2, 8)
 const locationPointerMaterial = new THREE.MeshStandardMaterial({color: 0xffffdd})
 
 const markers: POIMarker[] = [
+{
+    lnglat: [-2.35296, 51.63793],
+    altitudeRelativeToSceneOrigin: 12,
+    text: 'Clarences',
+    photo: 'clarences.jpg'
+},
     {
     lnglat: [-2.35208, 51.63766],
     altitudeRelativeToSceneOrigin: 10,
     text: 'Cotswold Book Room',
-    photo: 'bridge.jpg'
+    photo: 'cotswold-book-room.jpg'
 },
 {
-    lnglat: [-2.35296, 51.63793],
+    lnglat: [-2.35395, 51.63793],
+    altitudeRelativeToSceneOrigin: 16,
+    text: 'Daisy Daisy' ,
+    photo: 'daisy-daisy.jpg'
+},
+{
+    lnglat: [-2.35166, 51.63778],
+    altitudeRelativeToSceneOrigin: 7.5,
+    text: 'Good Food Kitchen and Bar' ,
+    photo: 'good-food.jpg'
+},
+{
+    lnglat: [-2.35182, 51.63778],
+    altitudeRelativeToSceneOrigin: 8,
+    text: 'Good Food on The Edge Greengrocer' ,
+    photo: 'greengrocer.jpg'
+},
+{
+    lnglat: [-2.35367, 51.63804],
     altitudeRelativeToSceneOrigin: 15,
-    text: 'Clarences',
-    photo: 'bridge.jpg'
+    text: 'Kings Barbershop' ,
+    photo: 'kings.jpg'
+},
+{
+    lnglat: [-2.35357, 51.63789],
+    altitudeRelativeToSceneOrigin: 15,
+    text: 'Loving Home' ,
+    photo: 'loving-home.jpg'
+},
+{
+    lnglat: [-2.35260, 51.63774],
+    altitudeRelativeToSceneOrigin: 11,
+    text: 'Relish' ,
+    photo: 'relish.jpg'
 },
 {
     lnglat: [-2.35497, 51.63814],
     altitudeRelativeToSceneOrigin: 18,
     text: 'The Royal Oak' ,
-    photo: 'bridge.jpg'
+    photo: 'royal-oak.jpg'
 },
 {
     lnglat: [-2.35323, 51.63780],
-    altitudeRelativeToSceneOrigin: 15,
+    altitudeRelativeToSceneOrigin: 12.5,
     text: 'The Edge Coffee Shop' ,
-    photo: 'bridge.jpg'
+    photo: 'the-edge.jpg'
 },
 {
-    lnglat: [-2.35395, 51.63793],
-    altitudeRelativeToSceneOrigin: 17,
-    text: 'Daisy Daisy' ,
-    photo: 'bridge.jpg'
+    lnglat: [-2.35014, 51.63769],
+    altitudeRelativeToSceneOrigin: 2,
+    text: 'The Falcon Steak House' ,
+    photo: 'the-falcon.jpg'
+},
+{
+    lnglat: [-2.35227, 51.63782],
+    altitudeRelativeToSceneOrigin: 10,
+    text: 'Wotton Home Essentials' ,
+    photo: 'wotton-home-essentials.jpg'
 }
 
 ] 
