@@ -11,30 +11,30 @@ type POIMarker = {
 const sceneOrigin: LngLatLike = [-2.35104, 51.63764]
 
 const markers: POIMarker[] = [
-//     {
-//     lnglat: [-2.35208, 51.63766],
-//     altitudeRelativeToSceneOrigin: 1.3,
-//     text: 'Cotswold Book Room'
-// },
-// {
-//     lnglat: [-2.35315, 51.63781],
-//     altitudeRelativeToSceneOrigin: 1.5,
-//     text: 'Tap Room'
-// },
-// {
-//     lnglat: [-2.35497, 51.63814],
-//     altitudeRelativeToSceneOrigin: 1,
-//     text: 'The Royal Oak' 
-// },
+    {
+    lnglat: [-2.35208, 51.63766],
+    altitudeRelativeToSceneOrigin: 10,
+    text: 'Cotswold Book Room'
+},
 {
-    lnglat: [-2.35106, 51.63764],
-    altitudeRelativeToSceneOrigin: 2,
+    lnglat: [-2.35296, 51.63793],
+    altitudeRelativeToSceneOrigin: 16,
+    text: 'Clarences'
+},
+{
+    lnglat: [-2.35497, 51.63814],
+    altitudeRelativeToSceneOrigin: 18,
+    text: 'The Royal Oak' 
+},
+{
+    lnglat: [-2.35323, 51.63780],
+    altitudeRelativeToSceneOrigin: 17,
     text: 'The Edge Coffee Shop' 
 },
 {
-    lnglat: [-2.35102, 51.63764],
-    altitudeRelativeToSceneOrigin: 2,
-    text: 'Clarences' 
+    lnglat: [-2.35395, 51.63793],
+    altitudeRelativeToSceneOrigin: 17,
+    text: 'Daisy Daisy' 
 }
 
 ] 
@@ -114,6 +114,12 @@ const customLayer: CustomLayerInterface & { three?: ThreeEngine } = {
         const camera = new THREE.Camera();
         const scene = new THREE.Scene();
 
+        // In threejs, y points up - we're rotating the scene such that it's y points along maplibre's up.
+        scene.rotateX(Math.PI / 2);
+        // In threejs, z points toward the viewer - mirroring it such that z points along maplibre's north.
+        scene.scale.multiply(new THREE.Vector3(1, 1, -1));
+        // We now have a scene with (x=east, y=up, z=north)
+
         // lighting
         const ambientLight = new THREE.AmbientLight(0xeeeeff, 0.4)
         const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
@@ -158,19 +164,19 @@ const customLayer: CustomLayerInterface & { three?: ThreeEngine } = {
         const three = this.three!
 
         const offsetFromCenterElevation = map.queryTerrainElevation(sceneOrigin) || 0;
-                    const sceneOriginMercator = mapboxgl.MercatorCoordinate.fromLngLat(sceneOrigin, offsetFromCenterElevation);
+        const sceneOriginMercator = mapboxgl.MercatorCoordinate.fromLngLat(sceneOrigin, offsetFromCenterElevation);
 
-                    const sceneTransform = {
-                        translateX: sceneOriginMercator.x,
-                        translateY: sceneOriginMercator.y,
-                        translateZ: sceneOriginMercator.z,
-                        scale: sceneOriginMercator.meterInMercatorCoordinateUnits()
-                    };
+        const sceneTransform = {
+            translateX: sceneOriginMercator.x,
+            translateY: sceneOriginMercator.y,
+            translateZ: sceneOriginMercator.z,
+            scale: sceneOriginMercator.meterInMercatorCoordinateUnits()
+        };
 
-                    const m = new THREE.Matrix4().fromArray(matrix);
-                    const l = new THREE.Matrix4()
-                        .makeTranslation(sceneTransform.translateX, sceneTransform.translateY, sceneTransform.translateZ)
-                        .scale(new THREE.Vector3(sceneTransform.scale, -sceneTransform.scale, sceneTransform.scale));
+        const m = new THREE.Matrix4().fromArray(matrix);
+        const l = new THREE.Matrix4()
+            .makeTranslation(sceneTransform.translateX, sceneTransform.translateY, sceneTransform.translateZ)
+            .scale(new THREE.Vector3(sceneTransform.scale, -sceneTransform.scale, sceneTransform.scale));
         
         
         three.camera.projectionMatrix = m.multiply(l);
