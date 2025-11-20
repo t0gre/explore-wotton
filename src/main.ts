@@ -133,7 +133,7 @@ const customLayer: CustomLayerInterface & { state?: RenderState } = {
         scene.add(ambientLight, directionalLight);
         
         // shapes
-        const markerGeometry = new THREE.BoxGeometry(3,3,3)
+        const markerGeometry = new THREE.BoxGeometry(4,3,0.5)
         
         // 1. Create a texture loader
         const loader = new THREE.TextureLoader();
@@ -155,6 +155,7 @@ const customLayer: CustomLayerInterface & { state?: RenderState } = {
             const markerMesh = new THREE.Mesh(markerGeometry, material)
 
             markerMesh.position.set(modelEast, marker.altitudeRelativeToSceneOrigin, modelNorth);
+            markerMesh.rotateY(Math.PI * Math.random()) // add some randomness so that they don't all have the same angle
 
             scene.add(markerMesh);
         
